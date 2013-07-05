@@ -10,10 +10,14 @@ ENDIF(WIN32)
 SET(${PROJECT_NAME}_HEADERS
   api.hpp
   model-abstract.hpp
+  model-awas.hpp
+  ilqr.hpp ilqr.t.cpp
+  integrator-rk4.hpp integrator-rk4.t.cpp
 )
 
 SET(${PROJECT_NAME}_SRC
   model-abstract.cpp
+  model-awas.cpp
 )
 
 # ----------------------------------------------------

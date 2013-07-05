@@ -3,6 +3,9 @@
 namespace viaopt
 {
 
+  ModelAbstract::
+  ModelAbstract ()
+  {}
 
   void ModelAbstract::
   display (std::ostream& os) const
