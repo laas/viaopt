@@ -11,8 +11,9 @@ namespace viaopt
   template<typename Model_t>
   Ilqr<Model_t>::
   Ilqr (void)
+    : nbPreviewSteps(0)
+    ,isInit(false)
   {
-    init();
   }
 
 
@@ -27,12 +28,20 @@ namespace viaopt
   void Ilqr<Model_t>::
   init ()
   {
+    assert( nbPreviewSteps>0);
+    
+    controlList.resize(nbPreviewSteps);
+    stateList.resize(nbPreviewSteps);
+
+    isInit = true;
   }
 
   template<typename Model_t>
   typename Ilqr<Model_t>::Control_t Ilqr<Model_t>::
   computeControl (const State_t& state)
   {
+    assert(isInit);
+
     newControlCycle(state);
     for(;;)
       {
@@ -42,6 +51,17 @@ namespace viaopt
       }
 
     return Control_t();
+  }
+
+  template<typename Model_t>
+  void Ilqr<Model_t>::
+  newControlCycle (const State_t& stateCurrent)
+  {
+    assert(isInit);
+   
+    stateList.front() = stateCurrent;
+    controlList.pop_front();
+    controlList.push_back( Control_t() );
   }
 
 } // namespace viaopt

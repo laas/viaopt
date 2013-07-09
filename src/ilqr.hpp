@@ -19,9 +19,12 @@ namespace viaopt
     typedef std::list<State_t> StateList_t;
     typedef std::list<Control_t> ControlList_t;
 
-  public: //protected: /* Intermediate members */
-    double previewWindow;
+  public: //protected: /* Parameters */
+    int nbPreviewSteps;
     double timeStep;
+    bool isInit;
+
+  public: //protected: /* Intermediate results */
     StateList_t stateList;
     ControlList_t controlList;
 
@@ -34,10 +37,10 @@ namespace viaopt
     Control_t computeControl (const State_t& state);
 
   public: // protected /* -- Intermediate functions -- */
-    void newControlCycle (const State_t& state) {}
-    void backwardLoop () {}
-    void forwardLoop () {}
-    bool testConvergence () { return true; }
+    void newControlCycle (const State_t& state);
+    void backwardLoop () { /* TODO */ }
+    void forwardLoop () { /* TODO */ }
+    bool testConvergence () { /* TODO */ }
 
   };
 
