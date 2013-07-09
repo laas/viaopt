@@ -13,6 +13,8 @@ int main (int , char** )
 {
   Ilqr<ModelAwas> ilqr;
 
+  ilqr.nbPreviewSteps = 5;
+  ilqr.init();
   ilqr.computeControl( ModelAwas::State_t() );
 
 }
