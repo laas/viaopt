@@ -30,12 +30,11 @@ int main (int , char** )
   double Wu1 = 0.001;
   
 
-    //    std::cout<<cost_du(0)<<"\n"<<cost_du(1)<<"\n";//<<cost_dx(2)<<"\n"<<cost_dx(3)<<"\n";
-
-    //      std::cout << State(0,0)<<" " << State(0,1)<<" " << State(0,2)<<" " << State(0,3)<<"\n";
-    //  std::cout << State(1,0)<<" " << State(1,1)<<" " << State(1,2)<<" " << State(1,3)<<"\n";  
-  //std::cout << State(2,0)<<" " << State(2,1)<<" " << State(2,2)<<" " << State(2,3)<<"\n";
-    // std::cout << State(3,0)<<" " << State(3,1)<<" " << State(3,2)<<" " << State(3,3)<<"\n";
+  // std::cout<<cost_du(0)<<"\n"<<cost_du(1)<<"\n";//<<cost_dx(2)<<"\n"<<cost_dx(3)<<"\n";
+  // std::cout << State(0,0)<<" " << State(0,1)<<" " << State(0,2)<<" " << State(0,3)<<"\n";
+  // std::cout << State(1,0)<<" " << State(1,1)<<" " << State(1,2)<<" " << State(1,3)<<"\n";  
+  // std::cout << State(2,0)<<" " << State(2,1)<<" " << State(2,2)<<" " << State(2,3)<<"\n";
+  // std::cout << State(3,0)<<" " << State(3,1)<<" " << State(3,2)<<" " << State(3,3)<<"\n";
 
    std::cout <<"\n"<<  control(0)<<"\n"<<control(1)<<"\n";
 

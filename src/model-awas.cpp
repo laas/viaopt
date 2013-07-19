@@ -19,12 +19,11 @@ namespace viaopt
     Tdes(50),
     mu(0.005),
     alpha(0.001),
-    n(14
-),
+    n(14),
     window(5)
 
   {
-}
+  }
 
   ModelAwas::
   ~ModelAwas ()
@@ -44,7 +43,7 @@ namespace viaopt
     state(2) = r;
 
     return state;
- }
+  }
 
   /* --- DERIVATION FUNCTIONS ----------------------------------------------- */
   ModelAwas::State_t ModelAwas::
@@ -124,20 +123,22 @@ namespace viaopt
   ModelAwas::Cost_t ModelAwas::
   integralCost     (const State_t& state, const Control_t& control) const
   {
-   Cost_t cost;
-   cost = Wterminal*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes) + Wu0*control(0)*control(0) + Wu1*control(1)*control(1) + Wlim *(-log(state(2)-0.05)-log(0.15-state(2)));
+    Cost_t cost;
+    cost = Wterminal*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes)
+      + Wu0*control(0)*control(0) + Wu1*control(1)*control(1) + Wlim *(-log(state(2)-0.05)-log(0.15-state(2)));
 
-      return cost;
+    return cost;
   }
 
-   ModelAwas::Cost_dx ModelAwas::
+  ModelAwas::Cost_dx ModelAwas::
   integralCost_dx (const State_t& state) const
   {
     Cost_dx cost_dx(4);
     cost_dx(0) = Wx*2*stiffness*state(2)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes);
     cost_dx(1) = 0.0;
     cost_dx(3) = 0.0;
-    cost_dx(2) = Wx*4*stiffness*state(0)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes) + Wlim*(-1/(state(2)-0.05)-1/(0.15-state(2)));
+    cost_dx(2) = Wx*4*stiffness*state(0)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes) 
+      + Wlim*(-1/(state(2)-0.05)-1/(0.15-state(2)));
     return cost_dx;
   }
 
@@ -157,7 +158,8 @@ namespace viaopt
     cost_dxx(0,0) = Wx*2*stiffness*stiffness*state(2)*state(2)*state(2)*state(2);
     cost_dxx(0,2) = Wx*4*stiffness*state(2)*(2*stiffness*state(2)*state(2)*state(0)-Tdes);
     cost_dxx(2,0) = cost_dxx(0,2);
-    cost_dxx(2,2) = Wx*(12*stiffness*stiffness*state(2)*state(2)*state(0)*state(0)-4*stiffness*state(0)*Tdes)+ Wlim*(+1/(state(2)-0.05)*1/(state(2)-0.05)-1/(0.15-state(2))/(0.15-state(2))); 
+    cost_dxx(2,2) = Wx*(12*stiffness*stiffness*state(2)*state(2)*state(0)*state(0)-4*stiffness*state(0)*Tdes)
+      + Wlim*(+1/(state(2)-0.05)*1/(state(2)-0.05)-1/(0.15-state(2))/(0.15-state(2))); 
     cost_dxx(0,1) =0;
     cost_dxx(0,3) =0;
     cost_dxx(1,0) =0;
@@ -171,11 +173,10 @@ namespace viaopt
     cost_dxx(3,2) =0;
     cost_dxx(3,3) =0;
 
-
     return cost_dxx;
   }
 
- ModelAwas::Cost_duu ModelAwas::
+  ModelAwas::Cost_duu ModelAwas::
   integralCost_duu () const
   {
     Cost_duu cost_duu(2,2);
@@ -191,7 +192,8 @@ namespace viaopt
   ModelAwas::Cost_t ModelAwas::
   terminalCost     (const State_t& state) const
   {
-    return  Wterminal*(Wx*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes) + Wlim *(-log(state(2)-0.05)-log(0.15-state(2))));
+    return  Wterminal*(Wx*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes)
+		       + Wlim *(-log(state(2)-0.05)-log(0.15-state(2))));
 
   }
 
@@ -207,9 +209,13 @@ namespace viaopt
     return Wterminal*integralCost_dxx(state);
   }
 
-  // Print Matrix and Vectors
 
-  void ModelAwas::Print44 (const Cost_dxx& C,const std::string S) const
+  /* ------------------------------------------------------------------------------ */
+  /* --- PRINT -------------------------------------------------------------------- */
+  /* ------------------------------------------------------------------------------ */
+  // print Matrix and Vectors
+
+  void ModelAwas::print44 (const Cost_dxx& C,const std::string S) const
   { 
     std::cout<<"\n"<<S<<"\n";
     std::cout<<C(0,0)<<"\t"<<C(0,1)<<"\t"<<C(0,2)<<"\t"<<C(0,3)<<"\n";
@@ -218,41 +224,45 @@ namespace viaopt
     std::cout<<C(3,0)<<"\t"<<C(3,1)<<"\t"<<C(3,2)<<"\t"<<C(3,3)<<"\n";
   }
 
- void ModelAwas::Print22 (const Cost_duu& C,const std::string S) const
+  void ModelAwas::print22 (const Cost_duu& C,const std::string S) const
   { 
     std::cout<<"\n"<<S<<"\n";
     std::cout<<C(0,0)<<"\t"<<C(0,1)<<"\n";
     std::cout<<C(1,0)<<"\t"<<C(1,1)<<"\n";
-   }
+  }
 
- void ModelAwas::Print21 (const Cost_du& C,const std::string S) const
+  void ModelAwas::print21 (const Cost_du& C,const std::string S) const
   { 
     std::cout<<"\n"<<S<<"\n";
     std::cout<<C(0)<<"\n";
     std::cout<<C(1)<<"\n";
-   }
+  }
 
- void ModelAwas::Print41 (const Cost_dx& C,const std::string S) const
+  void ModelAwas::print41 (const Cost_dx& C,const std::string S) const
   { 
     std::cout<<"\n"<<S<<"\n";
     std::cout<<C(0)<<"\n";
     std::cout<<C(1)<<"\n";
     std::cout<<C(2)<<"\n";
     std::cout<<C(3)<<"\n";
-   }
+  }
 
-  void ModelAwas::Print24 (const Cost_dxx  C,const std::string S) const {
-   std::cout<<"\n"<<S<<"\n";
+  void ModelAwas::print24 (const Cost_dxx  C,const std::string S) const {
+    std::cout<<"\n"<<S<<"\n";
     std::cout<<C(0,0)<<"\t"<<C(0,1)<<"\t"<<C(0,2)<<"\t"<<C(0,3)<<"\n";
     std::cout<<C(1,0)<<"\t"<<C(1,1)<<"\t"<<C(1,2)<<"\t"<<C(1,3)<<"\n";
-}
-  void ModelAwas::Print42 (const Cost_dxx  C,const std::string S) const {
-   std::cout<<"\n"<<S<<"\n";
-   std::cout<<C(0,0)<<"\t"<<C(0,1)<<"\n";
-   std::cout<<C(1,0)<<"\t"<<C(1,1)<<"\n";
-   std::cout<<C(2,0)<<"\t"<<C(2,1)<<"\n";
-   std::cout<<C(3,0)<<"\t"<<C(3,1)<<"\n";
-}
+  }
+  void ModelAwas::print42 (const Cost_dxx  C,const std::string S) const {
+    std::cout<<"\n"<<S<<"\n";
+    std::cout<<C(0,0)<<"\t"<<C(0,1)<<"\n";
+    std::cout<<C(1,0)<<"\t"<<C(1,1)<<"\n";
+    std::cout<<C(2,0)<<"\t"<<C(2,1)<<"\n";
+    std::cout<<C(3,0)<<"\t"<<C(3,1)<<"\n";
+  }
+
+  /* ------------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------------ */
 
   // Initialization without Stiffness (state : Theta and dTeheta/dT)
   ModelAwas::State_t ModelAwas::
@@ -275,7 +285,7 @@ namespace viaopt
     return state_dx;
   }
 
-ModelAwas::State_du ModelAwas::
+  ModelAwas::State_du ModelAwas::
   evolution_duInit   () const
   {
     State_du state_du(2,1);
@@ -285,8 +295,8 @@ ModelAwas::State_du ModelAwas::
   }
 
 
-   ModelAwas::Cost_dx ModelAwas::
-   integralCost_dxInit (const State_t& state,const double r) const
+  ModelAwas::Cost_dx ModelAwas::
+  integralCost_dxInit (const State_t& state,const double r) const
   {
     Cost_dx cost_dx(2);
     cost_dx(0) = Wx*2*stiffness*r*r*(stiffness*r*r*state(0)-Tdes);
@@ -313,7 +323,7 @@ ModelAwas::State_du ModelAwas::
     return cost_dxx;
   }
 
- ModelAwas::Cost_duu ModelAwas::
+  ModelAwas::Cost_duu ModelAwas::
   integralCost_duuInit () const
   {
     Cost_duu cost_duu(1,1);
