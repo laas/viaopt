@@ -1,0 +1,7 @@
+INPUT                  = /home/pgeoffro/src/viaopt/src \
+                         /home/pgeoffro/src/viaopt/doc/additionalDoc
+IMAGE_PATH             = /home/pgeoffro/src/viaopt/doc/pictures
+
+FILE_PATTERNS          = *.cc *.cpp *.h *.hpp *.hxx
+
+TAGFILES               = \

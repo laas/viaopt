@@ -1,0 +1,20 @@
+prefix=/usr/local
+exec_prefix=/usr/local
+libdir=/usr/local/lib
+includedir=/usr/local/include
+datarootdir=/usr/local/share
+pkgdatarootdir=/usr/local/share
+docdir=/usr/local/share/doc/viaopt
+doxygendocdir=/usr/local/share/doc/viaopt/doxygen-html
+
+Name: viaopt
+Description: ...
+URL: http://github.com/laas/viaopt
+Version: 0.0-1-g35f5-dirty
+Requires: 
+Conflicts: 
+Libs: -L${libdir} -lviaopt
+Libs.private: 
+Cflags: -I${includedir} -I/usr/include/eigen3
+
+
