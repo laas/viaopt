@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include "viaopt/api.hpp"
+#include <iostream>
 
 namespace viaopt
 {
@@ -50,16 +51,21 @@ namespace viaopt
       x = x  + (k1 + 2k2 + 2k3 + k4) / 6
      */
 
-    State_t k1 = evolution (state, control);
-    State_t k2 = evolution (state + k1*(timeStep/2), control);
-    State_t k3 = evolution (state + k2*(timeStep/2), control);
-    State_t k4 = evolution (state + k3, control);
+    State_t k1 = evolutionRK4 (state, control);
+    State_t k2 = evolutionRK4 (state + k1*(Model_t::dT/2), control);
+    State_t k3 = evolutionRK4 (state + k2*(Model_t::dT/2), control);
+    State_t k4 = evolutionRK4 (state + k3*Model_t::dT/2, control);
+
+    // std::cout<<"k1 "<<k1(2)<<" -  k2 : "<<k2(2)<<" -  k3 : "<<k3(2)<<" -  k4 : "<<k4(2)<< "\n";
 
     k1 += 2*k2;
     k1 += 2*k3;
     k1 += k4;
     state += k1*(1.0/6.0);
 
+    //state = evolution(state,control);
+
+    // std::cout <<k1(0) <<" "<<state(0)<< " \n"<<k1(1) <<" "<<state(1)<< " \n"<<k1(2) <<" "<<state(2)<< " \n"<<k1(3) <<" "<<state(3)<< " fin\n";
     return state;
   }
 
