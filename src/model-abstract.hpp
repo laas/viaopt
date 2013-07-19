@@ -60,10 +60,10 @@ namespace viaopt
 
   // Initialization
 
-    virtual State_t  evolutionInit     (const State_t& state, const Control_t& control,const double r) const;
-    virtual State_dx  evolution_dxInit   (const double r) const;
-    virtual State_du evolution_duInit   () const;
-    virtual Cost_dx integralCost_dxInit (const State_t& state,const double r) const;
+    virtual State_t  evolutionInit     (const State_t& state, const Control_t& control,const double r) const = 0;
+    virtual State_dx  evolution_dxInit   (const double r) const = 0;
+    virtual State_du evolution_duInit   () const = 0;
+    virtual Cost_dx integralCost_dxInit (const State_t& state,const double r) const = 0;
 
     };
 
