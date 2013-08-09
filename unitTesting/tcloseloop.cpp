@@ -44,7 +44,7 @@ int main (int , char** )
   std::cout << "debut\n";
   State_t S = robot.getState();
 
-  for (int cycle=0; cycle<0; ++cycle)
+  for (int cycle=0; cycle<2; ++cycle)
     {
       ilqr.computeControl (robot.getState());
       ControlList_t::iterator iter = ilqr.controlList.end();
@@ -58,6 +58,7 @@ int main (int , char** )
 
 	  // S = robot.integrate (control); // New state -- Pb with iRK4...
 	  S = model.evolution(S,control); // Temporarily solution !! No real state
+	  std::cout << "\nControl : "<< control(0)<<" - "<<control(1)<<"\n";
 	  std::cout<< "\nState : "<<S(0)<<" "<<S(1)<<" "<<S(2)<<" "<<S(3)<<"\n";
 
 	  // Recording the trajectory
