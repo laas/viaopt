@@ -10,17 +10,18 @@ namespace viaopt
     :
     stiffness(10000.0),
     inertia(0.27),
-    Wx(0.1),
-    Wu0(0.100),
+    Wx(10),
+    Wu0(0.10),
     Wu1(0.0010),
     Wterminal(1000),
     Wlim(0.010),
     dT(0.0001),
     Tdes(50),
+    Cible(0.2),
     mu(0.005),
     alpha(0.001),
-    n(14),
-    window(5)
+    n(15),
+    window(3)
 
   {
   }
@@ -41,7 +42,9 @@ namespace viaopt
     State_t state(4);
     state(0) = theta;
     state(2) = r;
-
+    state(1) = 0;
+    state(3) = 0;
+    assert(state.size()==4);
     return state;
   }
 
@@ -60,6 +63,8 @@ namespace viaopt
     state_new(2) = r;
     state_new(3) = rp;    
 
+
+    assert(state_new.size()==4);
     return state_new;
   }
 
@@ -75,16 +80,6 @@ namespace viaopt
     state_dx(2,2) = 1;
     state_dx(2,3) = dT;
     state_dx(3,3) = 1;
-
-    state_dx(0,2) = 0 ;
-    state_dx(0,3) = 0;
-    state_dx(1,3) = 0;
-    state_dx(2,0) = 0;
-    state_dx(2,1) = 0;
-    state_dx(3,0) = 0;
-    state_dx(3,1) = 0;
-    state_dx(3,2) = 0;
-
 
     return state_dx;
   }
@@ -117,6 +112,7 @@ namespace viaopt
     state_du(3,0) = 0;
 
     return state_du;
+
   }
 
 
@@ -124,8 +120,9 @@ namespace viaopt
   integralCost     (const State_t& state, const Control_t& control) const
   {
     Cost_t cost;
-    cost = Wterminal*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes)
-      + Wu0*control(0)*control(0) + Wu1*control(1)*control(1) + Wlim *(-log(state(2)-0.05)-log(0.15-state(2)));
+   //Commande en couple    
+    cost = Wterminal*(stiffness*state(2)*state(2)*state(0)-Tdes)*(stiffness*state(2)*state(2)*state(0)-Tdes) + Wu0*control(0)*control(0) + Wu1*control(1)*control(1) + Wlim *(-log(state(2)-0.05)-log(0.15-state(2)));
+
 
     return cost;
   }
@@ -134,18 +131,20 @@ namespace viaopt
   integralCost_dx (const State_t& state) const
   {
     Cost_dx cost_dx(4);
+    // Commande en Couple
     cost_dx(0) = Wx*2*stiffness*state(2)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes);
     cost_dx(1) = 0.0;
     cost_dx(3) = 0.0;
-    cost_dx(2) = Wx*4*stiffness*state(0)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes) 
-      + Wlim*(-1/(state(2)-0.05)-1/(0.15-state(2)));
-    return cost_dx;
+    cost_dx(2) = Wx*4*stiffness*state(0)*state(2)*(stiffness*state(2)*state(2)*state(0)-Tdes) + Wlim*(-1/(state(2)-0.05)-1/(0.15-state(2)));
+
+     return cost_dx;
   }
 
   ModelAwas::Cost_du ModelAwas::
   integralCost_du (const Control_t& control) const
   {
     Cost_du cost_du(2);
+
     cost_du(0) = 2*Wu0*control(0);
     cost_du(1) = 2*Wu1*control(1);
     return cost_du;
@@ -155,11 +154,13 @@ namespace viaopt
   integralCost_dxx (const State_t& state) const
   {
     Cost_dxx cost_dxx(4,4);
+
+    // Commande en couple
     cost_dxx(0,0) = Wx*2*stiffness*stiffness*state(2)*state(2)*state(2)*state(2);
     cost_dxx(0,2) = Wx*4*stiffness*state(2)*(2*stiffness*state(2)*state(2)*state(0)-Tdes);
     cost_dxx(2,0) = cost_dxx(0,2);
     cost_dxx(2,2) = Wx*(12*stiffness*stiffness*state(2)*state(2)*state(0)*state(0)-4*stiffness*state(0)*Tdes)
-      + Wlim*(+1/(state(2)-0.05)*1/(state(2)-0.05)-1/(0.15-state(2))/(0.15-state(2))); 
+    + Wlim*(+1/(state(2)-0.05)*1/(state(2)-0.05)-1/(0.15-state(2))/(0.15-state(2))); 
     cost_dxx(0,1) =0;
     cost_dxx(0,3) =0;
     cost_dxx(1,0) =0;
@@ -299,7 +300,7 @@ namespace viaopt
   integralCost_dxInit (const State_t& state,const double r) const
   {
     Cost_dx cost_dx(2);
-    cost_dx(0) = Wx*2*stiffness*r*r*(stiffness*r*r*state(0)-Tdes);
+    cost_dx(0) = 1*2*stiffness*r*r*(stiffness*r*r*state(0)-Tdes);
     cost_dx(1) = 0.0;
     return cost_dx;
   }
@@ -308,7 +309,7 @@ namespace viaopt
   integralCost_duInit (const Control_t& control) const
   {
     Cost_du cost_du(1);
-    cost_du(0) = 2*Wu0*control(0);
+    cost_du(0) = 2*0*control(0);
     return cost_du;
   }
 
@@ -316,7 +317,7 @@ namespace viaopt
   integralCost_dxxInit (const State_t& state,const double r) const
   {
     Cost_dxx cost_dxx(2,2);
-    cost_dxx(0,0) = Wx*2*stiffness*stiffness*r*r*r*r;
+    cost_dxx(0,0) = 1*2*stiffness*stiffness*r*r*r*r;
     cost_dxx(0,1) =0;
     cost_dxx(1,0) =0;
     cost_dxx(1,1) =0;
@@ -327,7 +328,7 @@ namespace viaopt
   integralCost_duuInit () const
   {
     Cost_duu cost_duu(1,1);
-    cost_duu(0,0) = 2*Wu0;
+    cost_duu(0,0) = 2*0;
     return cost_duu;
   }
 

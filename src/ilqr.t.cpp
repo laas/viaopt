@@ -63,7 +63,7 @@ namespace viaopt
     S(0) = SW(0);
     S(1) = SW(1);
     S(2) = state(2);
-    S(3) = state(3);
+    S(3) = 0;
 
     for( StateList_t::iterator iter=stateList.begin();
 	 stateList.end()!=iter;++iter )
@@ -82,13 +82,18 @@ namespace viaopt
 	Control_t CW = *iterControl;
 	C(0) = CW(0);
 	C(1) = 0.0; 
-	*iter = C ;     }
+	*iter = C ; 
+	if(iterControl!=initControl.end()){
+	  iterControl++;
+	}  
+  }
   }
 
   template<typename Model_t>
   void Ilqr<Model_t>::
   initWithoutStiff (State_t state){
     assert( isInit );
+    assert(state.size()==2);
     for( StateList_t::iterator iter=initState.begin();
 	 initState.end()!=iter;++iter )
       { *iter = state ;     }
@@ -102,6 +107,7 @@ namespace viaopt
   computeControl (const State_t& state)
   {
     assert(isInit);
+    assert(state.size()==4);
 
     State_t stateWS(2);
     stateWS(0) = state(0);
@@ -109,11 +115,13 @@ namespace viaopt
 
     double r = state(2);
 
-    initWithoutStiff(stateWS);
-    for(int i=0;i<20;i++){
-      initBackwardLoop(r);
-      initForwardLoop(r);
-    };
+      initWithoutStiff(stateWS);
+      for(int i=0;i<15;i++){
+        initBackwardLoop(r);
+         initForwardLoop(r);
+      };
+
+       model.print41(state,"init");
 
     initListStateControl(state,initState,initControl);
     backwardLoop();
@@ -162,6 +170,9 @@ namespace viaopt
       vxList.front() = Vx;
       Vxx = model.terminalCost_dxx(state);
       vxxList.front() = Vxx;
+      // model.print41(state,"State");
+      //  model.print41(Vx,"Vx");
+      //   model.print44(Vxx,"Vxx");
     }
  
     StateList_t::iterator iterState = stateList.begin();
@@ -179,10 +190,10 @@ namespace viaopt
       const State_t & state = *iterState;
       const Control_t & control = *iterControl;
 
-      //	model.Print41(Vx,"Vx");
-      //	model.Print44(Vxx,"Vxx");
-      //	model.Print41(state,"State");
-      //	model.Print21(control,"Control");
+      //  	model.print41(Vx,"Vx");
+      //	model.print44(Vxx,"Vxx");
+      //  	model.print41(state,"State");
+      //	model.print21(control,"Control");
 
       State_dx fx = model.evolution_dx(state);
       State_du fu = model. evolution_du();
@@ -192,13 +203,13 @@ namespace viaopt
       Cost_du Lu = model.integralCost_du(control);
       Cost_duu Luu = model.integralCost_duu();
 	
-      //	model.Print41(Lx,"LX");
-      //	model.Print44(Lxx,"LXX");
-      //	model.Print21(Lu,"LU");
-      //	model.Print22(Luu,"Luu");
+      //    model.print41(Lx,"LX");
+      //    model.print44(Lxx,"LXX");
+      //   model.print21(Lu,"LU");
+      //    model.print22(Luu,"Luu");
 
-      //	model.Print44(fx,"fx");
-      //	model.Print42(fu,"fu");
+      //      	model.print44(fx,"fx");
+      //    	model.print42(fu,"fu");
 
       for (int i=0;i<4;i++){
 	Vxx(i,i) = Vxx(i,i)+ model.mu;}
@@ -207,18 +218,36 @@ namespace viaopt
       VectorXd Qu = Lu + fu.transpose()*Vx;
       MatrixXd Qxx = Lxx + fx.transpose()*Vxx*fx;
       MatrixXd Quu = Luu + fu.transpose()*Vxx*fu;
-      MatrixXd Qux; Qux = fu.transpose()*Vxx*fx;
+      MatrixXd Qux = fu.transpose()*Vxx*fx;
 
       MatrixXd QuuInv = Quu.inverse();
-      Quu(0,1) =  Quu(0,1);
-      Quu(1,0) =  Quu(1,0);
 
-      //	model.Print22(Quu,"Quu");
+      //        model.print41(Qx,"Qx");
+      //  model.print22(QuuInv,"QuuInv");
+      //        model.print44(Qxx,"Qxx");
+      //       model.print22(Quu,"Quu");
+      //       model.print24(Qux,"Qux");
+      //       model.print21(Qu,"Qu");
 
       *iterOpenLoop =-(QuuInv*Qu);
       *iterGain = -(QuuInv*Qux);
       *iterVx = Qx - (Qux.transpose()*QuuInv*Qu);
+      Vx = *iterVx;
       *iterVxx = Qxx - (Qux.transpose()*QuuInv*Qux);
+      Vxx = *iterVxx;
+
+      //  model.print24(Qux,"Qux");
+      //   model.print22(QuuInv,"QuuInv");
+      //   model.print21(Qu,"Qu");
+      //   model.print41((Qux.transpose()*QuuInv*Qu),"1");
+      //   model.print44((Qux.transpose()*QuuInv*Qux),"2");
+
+      //      model.print24(*iterGain,"gain");
+      //     model.print21(*iterOpenLoop,"k");
+      //     model.print41(*iterVx,"Vx");
+      //     model.print44(*iterVxx,"Vxx");
+
+
 
       if ( iterState!=stateList.end()) {
 	iterState++; 
@@ -249,18 +278,25 @@ namespace viaopt
       MatrixXd gain = *iterGain;
       VectorXd kopenLoop = *iterOpenLoop;
 
+      //   model.print24(gain,"gain");
+      //    model.print21(kopenLoop,"k");
+
       State_t dState = stateT-state;
       Control_t controlNew = control + model.alpha*kopenLoop + gain*dState;
-      controlNew(1) = controlNew(1);
 
       VectorXd vx = *iterVx;
-      MatrixXd vxx = *iterVxx;      
+      MatrixXd vxx = *iterVxx;     
+
+      //    model.print41(vx,"VX"); 
 
       stateT = model.evolution(stateT,controlNew);
       iterState--; 
       state = *iterState;
       *iterState = stateT;
       *iterControl = controlNew;
+      //    model.print41(state,"State");
+	//  model.print21(controlNew,"ctrl");
+
   
       if (iterGain!=gainList.begin())
 	{iterGain--;
@@ -281,7 +317,7 @@ namespace viaopt
   template <typename Model_t>
   bool Ilqr<Model_t>:: testConvergence (int compteur)
   {
-    bool B = (compteur < 50);// && (tCost>0.1 || tCost<-0.1));
+    bool B = (compteur < 1 );// && (tCost>0.1 || tCost<-0.1));
     return B;
   }
 
@@ -298,6 +334,9 @@ namespace viaopt
       vxList.front() = Vx;
       Vxx = 1000*model.integralCost_dxxInit(state,r);
       vxxList.front() = Vxx;
+      //   model.print21(state,"State");
+      //   model.print21(Vx,"Vx");
+      //   model.print22(Vxx,"Vxx");
     }
  
     InitState::iterator iterState = initState.begin();
@@ -315,6 +354,9 @@ namespace viaopt
       const State_t & state = *iterState;
       const Control_t & control = *iterControl;
 
+      //    model.print21(state,"State");
+      //    std::cout <<"control : "<<control<<"\n";
+
       State_dx fx = model.evolution_dxInit(r);
       State_du fu = model. evolution_duInit();
 
@@ -324,20 +366,35 @@ namespace viaopt
       Cost_duu Luu = model.integralCost_duuInit();
 	
       for (int i=0;i<2;i++){
-	Vxx(i,i) = Vxx(i,i)+ model.mu;}
+	Vxx(i,i) = Vxx(i,i)+ 0.05;}
 
       VectorXd Qx = Lx + fx.transpose()*Vx;
-      VectorXd Qu = Lu + fu.transpose()*Vx;
+      VectorXd Qu = fu.transpose()*Vx;
       MatrixXd Qxx = Lxx + fx.transpose()*Vxx*fx;
-      MatrixXd Quu = Luu + fu.transpose()*Vxx*fu;
-      MatrixXd Qux; Qux = fu.transpose()*Vxx*fx;
+      MatrixXd Quu =  fu.transpose()*Vxx*fu;
+      MatrixXd Qux = fu.transpose()*Vxx*fx;
+
+      //  std::cout <<"fu : "<<fu<< "\n";
+
+      //    std::cout <<"Qx : "<<Qx(0)<<" ; "<<Qx(1)<<"\n";
+      //   std::cout <<"Qu : "<<Qu(0)<<"\n";
+      //   model.print22(Qxx,"Qxx");
+      //   std::cout <<"Quu : "<<Quu(0)<<"\n";
+      //   std::cout <<"Qux : "<<Qux(0)<<" ; "<<Qux(1)<<"\n";
 
       MatrixXd QuuInv = Quu.inverse();
 
       *iterOpenLoop = -(QuuInv*Qu);
       *iterGain = -(QuuInv*Qux);
       *iterVx =Qx - (Qux.transpose()*QuuInv*Qu);
+      Vx = *iterVx;
       *iterVxx = Qxx - (Qux.transpose()*QuuInv*Qux);
+      Vxx = *iterVxx;
+
+      //  model.print12(*iterGain,"gain");
+      //     model.print21(*iterOpenLoop,"k");
+      //     model.print21(*iterVx,"Vx");
+      //     model.print22(*iterVxx,"Vxx");
 
       if ( iterState!=stateList.end()) {
 	iterState++; 
@@ -368,18 +425,21 @@ namespace viaopt
       MatrixXd gain = *iterGain;
       VectorXd kopenLoop = *iterOpenLoop;
      
-      Control_t controlNew = control + model.alpha*kopenLoop + gain*(stateT-state);
+      Control_t controlNew = control + 0.1*kopenLoop + gain*(stateT-state);
+
+      std::cout<< "ctrl : " <<controlNew<<"\n";
+
 
       VectorXd vx = *iterVx;
       MatrixXd vxx = *iterVxx;      
 
       stateT = model.evolutionInit(stateT,controlNew,r);
-      ;
+      std::cout << "state : " <<stateT(0)<<" - "<<stateT(1)<<"\n";
       iterState--; 
       state = *iterState;
       *iterState = stateT;
-      *iterControl = controlNew;
-      
+      *iterControl = controlNew;    
+
       if (iterGain!=gainList.begin())
 	{iterGain--;
 	  iterOpenLoop--;

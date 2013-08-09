@@ -3,7 +3,7 @@
 
 #include <Eigen/Core>
 #include "viaopt/api.hpp"
-#include "viaopt/model-abstract.hpp"
+// #include "viaopt/model-abstract.hpp"
 
 namespace viaopt
 {
@@ -28,13 +28,14 @@ namespace viaopt
   public : //protected:
     double stiffness;
     double inertia;
-    double Wx;
-    double Wu0;
-    double Wu1;
-    double Wterminal;
-    double Wlim;
-    double dT;
-    double Tdes;
+    double Wx; // weight in the cost function 
+    double Wu0; // idem
+    double Wu1; //idem
+    double Wterminal; //idem
+    double Wlim; // idem
+    double dT; 
+    double Tdes; // desired torque
+    double Cible; // desired Position (useless for the moment)
     double mu;
     double alpha;
     int n; //size of the vector during optimization

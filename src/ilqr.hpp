@@ -16,7 +16,7 @@ namespace viaopt
   private:
  
   public: /* -- Types -- */
-    typedef typename Model_t::State_t State_t;
+    typedef typename Model_t::State_t State_t; 
     typedef typename Model_t::Control_t Control_t;
     typedef typename Model_t::State_dx State_dx;
     typedef typename Model_t::State_du State_du;
@@ -50,7 +50,7 @@ namespace viaopt
     bool isInit;
     int compteur;
 
-  public: //protected: /* Intermediate results, REVERSED TIME !!! */ 
+  public: //protected: /* Intermediate results, !!! REVERSED TIME !!! */ 
     StateList_t stateList;
     ControlList_t controlList;
     VxList vxList;
